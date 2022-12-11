@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ocelotapigweb-deployment
+  labels:
+    app: ocelotapigweb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ocelotapigweb
+  template:
+    metadata:
+      labels:
+        app: ocelotapigweb
+    spec:
+      containers:
+        - name: ocelotapigweb
+          image: aspnetcoremicroservices.azurecr.io/ocelotapigweb:v1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          env:
+             - name: ASPNETCORE_ENVIRONMENT
+               value: Development
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+      imagePullSecrets:
+        - name: acr-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ocelotapigweb-service
+spec:
+  selector:
+    app: ocelotapigweb
+  ports:
+    - protocol: TCP
+      port: 80

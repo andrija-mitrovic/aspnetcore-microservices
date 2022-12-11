@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orderingapi-deployment
+  labels:
+    app: orderingapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orderingapi
+  template:
+    metadata:
+      labels:
+        app: orderingapi
+    spec:
+      containers:
+        - name: orderingapi
+          image: aspnetcoremicroservices.azurecr.io/orderingapi:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          env:
+             - name: ASPNETCORE_ENVIRONMENT
+               value: Development
+             - name: DatabaseSettings__ConnectionString
+               valueFrom:
+                  configMapKeyRef:
+                    name: orderdb-configmap
+                    key: connection_string
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: orderingapi-service
+spec:
+  selector:
+    app: orderingapi
+  ports:
+    - protocol: TCP
+      port: 80
